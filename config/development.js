@@ -5,7 +5,7 @@ module.exports = {
     STREAM_USERNAME: 'admin',
     STREAM_PASSWORD: 'admin',
     STREAM_PROTOCOL: 'udp',
-    USE_TLS: true,
+    USE_TLS: false,
     // TLS_KEY_PATH: '',
     // TLS_CRT_PATH: '',
 }
