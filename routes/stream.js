@@ -22,8 +22,8 @@ router.post('/', [ authMiddleware ], (req, res) => {
         protocol: configEnv['STREAM_PROTOCOL'],
         ffmpegOptions: { // options ffmpeg flags
           '-stats': '', // an option with no neccessary value uses a blank string
-          '-r': 30, // options with required values specify the value after the key
-          '-vf': 'scale=320:-1',
+          '-r': 20, // options with required values specify the value after the key
+          '-vf': 'scale=320:240',
           '-d': 4 + duration
         }
       })

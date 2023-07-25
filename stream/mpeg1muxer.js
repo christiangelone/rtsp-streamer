@@ -24,6 +24,8 @@ Mpeg1Muxer = function(options) {
   this.spawnOptions = [
     "-rtsp_transport",
     this.protocol,
+    "-analyzeduration",
+    "100000",
     "-i",
     this.url,
     '-f',
@@ -32,6 +34,8 @@ Mpeg1Muxer = function(options) {
     'mpeg1video',
     // additional ffmpeg options go here
     ...this.additionalFlags,
+    '-preset',
+    'ultrafast',
     '-'
   ]
   this.stream = child_process.spawn("ffmpeg", this.spawnOptions, {
