@@ -4,6 +4,7 @@ const express = require('express');
 const server = express();
 
 server.use(bodyParser.json())
+server.use(express.static('static'));
 require('./routes')(server)
 
 // server.use('/static', express.static('static'))

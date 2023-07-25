@@ -31,6 +31,7 @@ router.post('/', [ authMiddleware ], (req, res) => {
     }
     setTimeout(() => {
       if (streams[name]){
+        console.log('Timeout for exposing websocket')
         streams[name].stop()
         delete streams[name]
       }

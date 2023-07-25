@@ -1,17 +1,14 @@
 const configEnv = require('../config')(process.env['NODE_ENV'])
-var Mpeg1Muxer, STREAM_MAGIC_BYTES, VideoStream, events, util, ws
 
-ws = require('ws')
-
-util = require('util')
-
-events = require('events')
-
-Mpeg1Muxer = require('./mpeg1muxer')
-
-STREAM_MAGIC_BYTES = "jsmp" // Must be 4 bytes
-
+const https = require('https');
+const ws = require('ws')
+const util = require('util')
+const events = require('events')
+const Mpeg1Muxer = require('./mpeg1muxer')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
+
+const STREAM_MAGIC_BYTES = "jsmp" // Must be 4 bytes
 
 VideoStream = function(options) {
   this.options = options
@@ -31,7 +28,10 @@ VideoStream = function(options) {
 util.inherits(VideoStream, events.EventEmitter)
 
 VideoStream.prototype.stop = function() {
+  console.log('Stopping streaming...')
   this.wsServer.close()
+  if(this.server)
+    this.server.close()
   this.stream.kill()
   this.inputStreamStarted = false
   return this
@@ -92,6 +92,23 @@ VideoStream.prototype.startMpeg1Stream = function() {
 }
 
 VideoStream.prototype.pipeStreamToSocketServer = function() {
+  let server = undefined
+  let port = undefined
+  if (configEnv['USE_TLS']) {
+    const options = {
+      key: fs.readFileSync(configEnv['TLS_KEY_PATH']),
+      cert: fs.readFileSync(configEnv['TLS_CRT_PATH'])
+    };
+    server = https.createServer(options, (_, res) => {
+      res.writeHeader(200);
+      res.end();
+    });
+    server.listen(this.wsPort);
+    this.server = server
+  } else {
+    port = this.wsPort
+  }
+
   this.wsServer = new ws.Server({
     verifyClient: (info, done) => {
       if (this.secure) {
@@ -102,7 +119,8 @@ VideoStream.prototype.pipeStreamToSocketServer = function() {
         done(true)
       }
     },
-    port: this.wsPort
+    server,
+    port,
   })
   this.wsServer.on("connection", (socket, request) => {
     return this.onSocketConnect(socket, request)
